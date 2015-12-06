@@ -26,7 +26,7 @@ class Shrine
       # Purges the file from the source storage after moving it.
       def move(io, id, metadata = {})
         @storage.move(io, id, metadata)
-        purge(io.id)
+        io.storage.purge(io.id) if io.storage.is_a?(Storage::Imgix)
       end
 
       def movable?(io, id)
