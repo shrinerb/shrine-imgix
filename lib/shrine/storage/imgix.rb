@@ -33,6 +33,15 @@ class Shrine
         @storage.movable?(io, id) if @storage.respond_to?(:movable?)
       end
 
+      def multi_delete(ids)
+        if @storage.respond_to?(:multi_delete)
+          @storage.multi_delete(ids)
+          ids.each { |id| purge(id) }
+        else
+          ids.each { |id| delete(id) }
+        end
+      end
+
       # Purges the deleted file.
       def delete(id)
         @storage.delete(id)
