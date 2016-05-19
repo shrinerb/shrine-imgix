@@ -27,7 +27,7 @@ describe Shrine::Storage::Imgix do
   end
 
   after do
-    @imgix.clear!(:confirm)
+    @imgix.clear!
   end
 
   it "passes the linter" do
@@ -43,7 +43,7 @@ describe Shrine::Storage::Imgix do
     end
 
     it "creates a valid downloadable URL" do
-      @imgix.upload(image, "image.jpg", {"mime_type" => "image/jpeg"})
+      @imgix.upload(image, "image.jpg", shrine_metadata: {"mime_type" => "image/jpeg"})
       url = @imgix.url("image.jpg", w: 150)
       tempfile = Down.download(url)
 

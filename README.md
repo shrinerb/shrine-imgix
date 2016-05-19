@@ -1,6 +1,9 @@
-# Shrine::Imgix
+# Shrine::Storage::Imgix
 
 Provides [Imgix] integration for [Shrine].
+
+Imgix is a service for processing images on the fly, and works with files
+stored on Amazon S3.
 
 ## Installation
 

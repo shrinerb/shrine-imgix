@@ -24,8 +24,8 @@ class Shrine
       delegate [:upload, :download, :open, :read, :exists?, :clear!] => :storage
 
       # Purges the file from the source storage after moving it.
-      def move(io, id, metadata = {})
-        @storage.move(io, id, metadata)
+      def move(io, id, **options)
+        @storage.move(io, id, **options)
         io.storage.purge(io.id) if io.storage.is_a?(Storage::Imgix)
       end
 
