@@ -5,9 +5,9 @@ require "down"
 
 describe Shrine::Storage::Imgix do
   def imgix(options = {})
-    options[:storage] ||= s3
-    options[:host]    ||= ENV.fetch("IMGIX_HOST")
-    options[:token]   ||= ENV.fetch("IMGIX_API_KEY")
+    options[:storage]          ||= s3
+    options[:host]             ||= ENV.fetch("IMGIX_HOST")
+    options[:secure_url_token] ||= ENV.fetch("IMGIX_API_KEY")
 
     Shrine::Storage::Imgix.new(options)
   end
