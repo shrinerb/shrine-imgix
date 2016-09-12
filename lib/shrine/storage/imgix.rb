@@ -15,7 +15,7 @@ class Shrine
       # reader for the token.
       def initialize(storage:, **options)
         @client = ::Imgix::Client.new(options)
-        @token = options[:secure_url_token]
+        @api_key = options[:api_key]
         @storage = storage
       end
 
@@ -51,7 +51,7 @@ class Shrine
       # Removes the file from Imgix, along with the generated versions.
       def purge(id)
         uri = URI.parse(PURGE_URL)
-        uri.user = @token
+        uri.user = @api_key
 
         post(uri, "url" => url(id))
       end

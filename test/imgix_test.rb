@@ -7,7 +7,8 @@ describe Shrine::Storage::Imgix do
   def imgix(options = {})
     options[:storage]          ||= s3
     options[:host]             ||= ENV.fetch("IMGIX_HOST")
-    options[:secure_url_token] ||= ENV.fetch("IMGIX_API_KEY")
+    options[:api_key]          ||= ENV.fetch("IMGIX_API_KEY")
+    options[:secure_url_token] ||= ENV.fetch("IMGIX_SECURE_URL_TOKEN")
 
     Shrine::Storage::Imgix.new(options)
   end
