@@ -26,7 +26,8 @@ s3 = Shrine::Storage::S3.new(**s3_options)
 imgix = Shrine::Storage::Imgix.new(
   storage: s3,
   host: "my-subdomain.imgix.net",
-  token: "abc123",
+  secure_url_token: "abc123",
+  imgix_api_key: "xzy123",
 )
 
 Shrine.storages[:store] = imgix
@@ -54,6 +55,7 @@ appropriate credentials:
 
 ```sh
 # .env
+IMGIX_SECURE_URL_TOKEN="..."
 IMGIX_API_KEY="..."
 IMGIX_HOST="..."
 S3_ACCESS_KEY_ID="..."
