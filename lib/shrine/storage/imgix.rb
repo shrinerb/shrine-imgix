@@ -15,7 +15,7 @@ class Shrine
       # reader for the token.
       def initialize(storage:, **options)
         @client = ::Imgix::Client.new(options)
-        @api_key = options[:api_key]
+        @api_key = options.fetch(:api_key)
         @storage = storage
       end
 

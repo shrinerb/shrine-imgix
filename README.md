@@ -22,12 +22,11 @@ various sources (S3, Web Folder or Web Proxy), so you first need to set that up
 require "shrine/storage/imgix"
 require "shrine/storage/s3"
 
-s3 = Shrine::Storage::S3.new(**s3_options)
 imgix = Shrine::Storage::Imgix.new(
-  storage: s3,
-  host: "my-subdomain.imgix.net",
-  secure_url_token: "abc123",
-  imgix_api_key: "xzy123",
+  storage:          Shrine::Storage::S3.new(**s3_options),
+  api_key:          "xzy123",
+  host:             "my-subdomain.imgix.net",
+  secure_url_token: "abc123", # optional
 )
 
 Shrine.storages[:store] = imgix
@@ -55,9 +54,9 @@ appropriate credentials:
 
 ```sh
 # .env
-IMGIX_SECURE_URL_TOKEN="..."
 IMGIX_API_KEY="..."
 IMGIX_HOST="..."
+IMGIX_SECURE_URL_TOKEN="..." # optional
 S3_ACCESS_KEY_ID="..."
 S3_SECRET_ACCESS_KEY="..."
 S3_REGION="..."
