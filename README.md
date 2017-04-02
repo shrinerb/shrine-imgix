@@ -24,16 +24,19 @@ require "shrine/storage/s3"
 
 imgix = Shrine::Storage::Imgix.new(
   storage:          Shrine::Storage::S3.new(**s3_options),
-  api_key:          "xzy123",
-  host:             "my-subdomain.imgix.net",
-  secure_url_token: "abc123", # optional
+  include_prefix:   true, # set to false if you have prefix configured in Imgix source
+  api_key:          "xzy123",                 #
+  host:             "my-subdomain.imgix.net", # Imgix::Client options
+  secure_url_token: "abc123", # optional      #
 )
 
 Shrine.storages[:store] = imgix
 ```
 
-All options other than `:storage` are used for instantiating an `Imgix::Client`,
-so see the [imgix] gem for information about all possible options.
+All options other than `:storage` and `:include_prefix` are used for
+instantiating an `Imgix::Client`, see the [imgix] gem for information about all
+possible options. The `:include_prefix` option decides whether the `#prefix`
+of the underlying storage will be included in the generated Imgix URLs.
 
 All storage actions are forwarded to the main storage, and deleted files are
 automatically purged from Imgix. The only method that the Imgix storage
@@ -46,16 +49,6 @@ post.image.url(w: 150, h: 200, fit: "crop")
 
 See the [Imgix docs](https://www.imgix.com/docs/reference) for all available
 URL options.
-
-By default Imgix URLs will *not* include `#prefix` of the underlying storage,
-which is suitable for when you already configured an Amazon S3 prefix on Imgix,
-or you set up Imgix to proxy domain content from a subfolder. If no prefixes
-are configured on Imgix, you probably want generated Imgix URLs to include the
-`#prefix` of the underlying storage:
-
-```rb
-Shrine::Storage::Imgix.new(include_prefix: true, **options)
-```
 
 ## Development
 
