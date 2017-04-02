@@ -21,7 +21,7 @@ class Shrine
 
       # We delegate all methods that are the same.
       extend Forwardable
-      delegate [:upload, :download, :open, :read, :exists?, :clear!] => :storage
+      delegate [:upload, :download, :open, :exists?, :clear!] => :storage
 
       # Purges the file from the source storage after moving it.
       def move(io, id, **options)
