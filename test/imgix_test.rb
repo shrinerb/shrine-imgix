@@ -50,6 +50,12 @@ describe Shrine::Storage::Imgix do
 
       assert_equal "image/jpeg", tempfile.content_type
     end
+
+    it "includes prefix in the URL when :include_prefix is set" do
+      url = imgix(include_prefix: true).url("image.jpg")
+
+      assert_includes url, ENV["S3_PREFIX"]
+    end
   end
 
   describe "#presign" do

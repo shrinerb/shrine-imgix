@@ -16,7 +16,7 @@ class Shrine
         @client = ::Imgix::Client.new(options)
         @api_key = options.fetch(:api_key)
         @storage = storage
-        @include_prefix = prefix
+        @include_prefix = include_prefix
 
         instance_eval do
           # Purges the file from the source storage after moving it.
@@ -66,7 +66,7 @@ class Shrine
       #
       # [reference]: https://www.imgix.com/docs/reference
       def url(id, **options)
-        id = [*prefix, id].join("/") if @include_prefix
+        id = [*@storage.prefix, id].join("/") if @include_prefix
 
         client.path(id).to_url(**options)
       end
