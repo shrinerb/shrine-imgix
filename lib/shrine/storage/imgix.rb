@@ -12,10 +12,11 @@ class Shrine
       # We initialize the Imgix client, and save the storage. We additionally
       # save the token as well, because `Imgix::Client` doesn't provide a
       # reader for the token.
-      def initialize(storage:, **options)
+      def initialize(storage:, include_prefix: false, **options)
         @client = ::Imgix::Client.new(options)
         @api_key = options.fetch(:api_key)
         @storage = storage
+        @include_prefix = prefix
 
         instance_eval do
           # Purges the file from the source storage after moving it.
@@ -65,6 +66,8 @@ class Shrine
       #
       # [reference]: https://www.imgix.com/docs/reference
       def url(id, **options)
+        id = [*prefix, id].join("/") if @include_prefix
+
         client.path(id).to_url(**options)
       end
 

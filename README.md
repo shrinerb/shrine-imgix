@@ -47,6 +47,16 @@ post.image.url(w: 150, h: 200, fit: "crop")
 See the [Imgix docs](https://www.imgix.com/docs/reference) for all available
 URL options.
 
+By default Imgix URLs will *not* include `#prefix` of the underlying storage,
+which is suitable for when you already configured an Amazon S3 prefix on Imgix,
+or you set up Imgix to proxy domain content from a subfolder. If no prefixes
+are configured on Imgix, you probably want generated Imgix URLs ot include the
+`#prefix` of the underlying storage:
+
+```rb
+Shrine::Storage::Imgix.new(include_prefix: true, **options)
+```
+
 ## Development
 
 The tests for shrine-imgix uses S3, so you'll have to create an `.env` file with
