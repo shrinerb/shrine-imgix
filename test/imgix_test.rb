@@ -51,4 +51,12 @@ describe Shrine::Storage::Imgix do
       assert_equal "image/jpeg", tempfile.content_type
     end
   end
+
+  describe "#presign" do
+    it "delegates to underlying storage" do
+      presign = @imgix.presign("image.jpg")
+      assert_instance_of String, presign.url
+      assert_instance_of Hash,   presign.fields
+    end
+  end
 end

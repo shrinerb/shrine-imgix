@@ -32,6 +32,10 @@ class Shrine
             @storage.download(id)
           end if @storage.respond_to?(:download)
 
+          def presign(*args)
+            @storage.presign(*args)
+          end if @storage.respond_to?(:presign)
+
           def multi_delete(ids)
             @storage.multi_delete(ids)
             ids.each { |id| purge(id) }
