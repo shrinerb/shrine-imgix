@@ -1,5 +1,4 @@
 require "imgix"
-require "forwardable"
 require "net/http"
 require "uri"
 
@@ -17,29 +16,52 @@ class Shrine
         @client = ::Imgix::Client.new(options)
         @api_key = options.fetch(:api_key)
         @storage = storage
-      end
 
-      # We delegate all methods that are the same.
-      extend Forwardable
-      delegate [:upload, :download, :open, :exists?, :clear!] => :storage
+        instance_eval do
+          # Purges the file from the source storage after moving it.
+          def move(io, id, **options)
+            @storage.move(io, id, **options)
+            io.storage.purge(io.id) if io.storage.is_a?(Storage::Imgix)
+          end if @storage.respond_to?(:move)
 
-      # Purges the file from the source storage after moving it.
-      def move(io, id, **options)
-        @storage.move(io, id, **options)
-        io.storage.purge(io.id) if io.storage.is_a?(Storage::Imgix)
-      end
+          def movable?(io, id)
+            @storage.movable?(io, id)
+          end if @storage.respond_to?(:movable?)
 
-      def movable?(io, id)
-        @storage.movable?(io, id) if @storage.respond_to?(:movable?)
-      end
+          def download(id)
+            @storage.download(id)
+          end if @storage.respond_to?(:download)
 
-      def multi_delete(ids)
-        if @storage.respond_to?(:multi_delete)
-          @storage.multi_delete(ids)
-          ids.each { |id| purge(id) }
-        else
-          ids.each { |id| delete(id) }
+          def multi_delete(ids)
+            @storage.multi_delete(ids)
+            ids.each { |id| purge(id) }
+          end if @storage.respond_to?(:multi_delete)
+
+          def clear!(*args)
+            @storage.clear!(*args)
+          end if @storage.respond_to?(:clear!)
         end
+      end
+
+      def upload(io, id, **options)
+        @storage.upload(io, id, **options)
+      end
+
+      def open(id)
+        @storage.open(id)
+      end
+
+      def exists?(id)
+        @storage.exists?(id)
+      end
+
+      # Generates an Imgix URL to the file. All options passed in will be
+      # transformed into URL parameters, check out the [reference] for all
+      # available query parameters.
+      #
+      # [reference]: https://www.imgix.com/docs/reference
+      def url(id, **options)
+        client.path(id).to_url(**options)
       end
 
       # Purges the deleted file.
@@ -54,15 +76,6 @@ class Shrine
         uri.user = @api_key
 
         post(uri, "url" => url(id))
-      end
-
-      # Generates an Imgix URL to the file. All options passed in will be
-      # transformed into URL parameters, check out the [reference] for all
-      # available query parameters.
-      #
-      # [reference]: https://www.imgix.com/docs/reference
-      def url(id, **options)
-        client.path(id).to_url(**options)
       end
 
       private
