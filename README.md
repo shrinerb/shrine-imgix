@@ -50,7 +50,7 @@ URL options.
 By default Imgix URLs will *not* include `#prefix` of the underlying storage,
 which is suitable for when you already configured an Amazon S3 prefix on Imgix,
 or you set up Imgix to proxy domain content from a subfolder. If no prefixes
-are configured on Imgix, you probably want generated Imgix URLs ot include the
+are configured on Imgix, you probably want generated Imgix URLs to include the
 `#prefix` of the underlying storage:
 
 ```rb
