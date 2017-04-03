@@ -13,14 +13,14 @@ describe Shrine::Storage::Imgix do
     Shrine::Storage::Imgix.new(options)
   end
 
-  def s3
-    Shrine::Storage::S3.new(
-      bucket:            ENV.fetch("S3_BUCKET"),
-      region:            ENV.fetch("S3_REGION"),
-      access_key_id:     ENV.fetch("S3_ACCESS_KEY_ID"),
-      secret_access_key: ENV.fetch("S3_SECRET_ACCESS_KEY"),
-      prefix:            ENV.fetch("S3_PREFIX")
-    )
+  def s3(options = {})
+    options[:bucket]            ||= ENV.fetch("S3_BUCKET")
+    options[:region]            ||= ENV.fetch("S3_REGION")
+    options[:access_key_id]     ||= ENV.fetch("S3_ACCESS_KEY_ID")
+    options[:secret_access_key] ||= ENV.fetch("S3_SECRET_ACCESS_KEY")
+    options[:prefix]            ||= ENV.fetch("S3_PREFIX")
+
+    Shrine::Storage::S3.new(options)
   end
 
   before do
@@ -52,9 +52,9 @@ describe Shrine::Storage::Imgix do
     end
 
     it "includes prefix in the URL when :include_prefix is set" do
-      url = imgix(include_prefix: true).url("image.jpg")
-
-      assert_includes url, ENV["S3_PREFIX"]
+      storage = s3(prefix: "prefix")
+      refute_includes imgix(storage: storage).url("image.jpg"), "prefix"
+      assert_includes imgix(storage: storage, include_prefix: true).url("image.jpg"), "prefix"
     end
   end
 
