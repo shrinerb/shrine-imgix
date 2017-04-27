@@ -50,6 +50,13 @@ post.image.url(w: 150, h: 200, fit: "crop")
 See the [Imgix docs](https://www.imgix.com/docs/reference) for all available
 URL options.
 
+If you're using [imgix-rails] and want to use the `ix_image_tag` helper method,
+you can extract the path portion of the URL and pass it on to the helper:
+
+```erb
+<%= ix_image_tag URI(photo.image.url).path, { w: 300, h: 500, fit: "crop" } %>
+```
+
 ## Development
 
 The tests for shrine-imgix uses S3, so you'll have to create an `.env` file with
@@ -81,3 +88,4 @@ $ bundle exec rake test
 [Shrine]: https://github.com/janko-m/shrine
 [imgix]: https://github.com/imgix/imgix-rb
 [Imgix documentation]: https://www.imgix.com/docs
+[imgix-rails]: https://github.com/imgix/imgix-rails
