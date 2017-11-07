@@ -37,11 +37,6 @@ class Shrine
             @storage.presign(*args)
           end if @storage.respond_to?(:presign)
 
-          def multi_delete(ids)
-            @storage.multi_delete(ids)
-            ids.each { |id| purge(id) }
-          end if @storage.respond_to?(:multi_delete)
-
           def clear!(*args)
             @storage.clear!(*args)
           end if @storage.respond_to?(:clear!)
