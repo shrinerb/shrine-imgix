@@ -14,10 +14,10 @@ Gem::Specification.new do |gem|
   gem.require_path = "lib"
 
   gem.add_dependency "shrine", "~> 2.0"
-  gem.add_dependency "imgix", "~> 1.0"
+  gem.add_dependency "imgix", ">= 1.2", "< 4"
 
   gem.add_development_dependency "rake"
   gem.add_development_dependency "minitest"
-  gem.add_development_dependency "dotenv"
-  gem.add_development_dependency "aws-sdk-s3", "~> 1.2"
+  gem.add_development_dependency "mocha"
+  gem.add_development_dependency "shrine-memory"
 end

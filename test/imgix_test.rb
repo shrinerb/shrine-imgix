@@ -1,68 +1,89 @@
 require "test_helper"
-require "shrine/storage/linter"
-require "shrine/storage/s3"
-require "down"
+require "shrine/plugins/imgix"
+require "shrine/storage/memory"
+require "stringio"
 
-describe Shrine::Storage::Imgix do
-  def imgix(options = {})
-    options[:storage]          ||= s3
-    options[:host]             ||= ENV.fetch("IMGIX_HOST")
-    options[:api_key]          ||= ENV.fetch("IMGIX_API_KEY")
-    options[:secure_url_token] ||= ENV.fetch("IMGIX_SECURE_URL_TOKEN", nil)
-
-    Shrine::Storage::Imgix.new(options)
-  end
-
-  def s3(options = {})
-    options[:bucket]            ||= ENV.fetch("S3_BUCKET")
-    options[:region]            ||= ENV.fetch("S3_REGION")
-    options[:access_key_id]     ||= ENV.fetch("S3_ACCESS_KEY_ID")
-    options[:secret_access_key] ||= ENV.fetch("S3_SECRET_ACCESS_KEY")
-    options[:prefix]            ||= ENV.fetch("S3_PREFIX")
-
-    Shrine::Storage::S3.new(options)
-  end
-
+describe Shrine::Plugins::Imgix do
   before do
-    @imgix = imgix
+    @shrine = Class.new(Shrine)
+    @shrine.storages[:memory] = Shrine::Storage::Memory.new
   end
 
-  after do
-    @imgix.clear!
-  end
+  describe ".configure" do
+    it "accepts :client as a hash" do
+      @shrine.plugin :imgix, client: { host: "shrine.imgix.net" }
 
-  it "passes the linter" do
-    Shrine::Storage::Linter.call(@imgix)
-  end
-
-  describe "#url" do
-    it "creates URL parameters out of options" do
-      url = @imgix.url("image.jpg", w: 150)
-
-      assert_includes url, ENV["IMGIX_HOST"]
-      assert_includes url, "w=150"
+      assert_instance_of Imgix::Client, @shrine.imgix_client
+      assert_match "https://shrine.imgix.net/foo", @shrine.imgix_client.path("/foo").to_url
     end
 
-    it "creates a valid downloadable URL" do
-      @imgix.upload(image, "image.jpg", shrine_metadata: {"mime_type" => "image/jpeg"})
-      url = @imgix.url("image.jpg", w: 150)
-      tempfile = Down.download(url)
+    it "accepts :client as an Imgix::Client" do
+      @shrine.plugin :imgix, client: Imgix::Client.new(host: "shrine.imgix.net")
 
-      assert_equal "image/jpeg", tempfile.content_type
+      assert_instance_of Imgix::Client, @shrine.imgix_client
+      assert_match "https://shrine.imgix.net/foo", @shrine.imgix_client.path("/foo").to_url
     end
 
-    it "includes prefix in the URL when :include_prefix is set" do
-      storage = s3(prefix: "prefix")
-      refute_includes imgix(storage: storage).url("image.jpg"), "prefix"
-      assert_includes imgix(storage: storage, include_prefix: true).url("image.jpg"), "prefix"
+    it "fails on missing :client option" do
+      assert_raises Shrine::Error do
+        @shrine.plugin :imgix
+      end
     end
   end
 
-  describe "#presign" do
-    it "delegates to underlying storage" do
-      presign = @imgix.presign("image.jpg")
-      assert_instance_of String, presign.url
-      assert_instance_of Hash,   presign.fields
+  describe "UploadedFile" do
+    before do
+      @shrine.plugin :imgix, client: { host: "shrine.imgix.net", include_library_param: false }
+
+      @file = @shrine.upload(StringIO.new("file"), :memory, location: "foo")
+    end
+
+    describe "#imgix_url" do
+      it "returns imgix URL" do
+        assert_equal "https://shrine.imgix.net/foo", @file.imgix_url
+      end
+
+      it "accepts transformation options" do
+        assert_equal "https://shrine.imgix.net/foo?w=100&h=100", @file.imgix_url(w: 100, h: 100)
+      end
+
+      it "includes storage prefix" do
+        @shrine.storages[:memory].instance_eval { def prefix; "prefix"; end }
+
+        assert_equal "https://shrine.imgix.net/prefix/foo", @file.imgix_url
+      end
+
+      it "doesn't include storage prefix when disabled" do
+        @shrine.plugin :imgix, prefix: false
+        @shrine.storages[:memory].instance_eval { def prefix; "prefix"; end }
+
+        assert_equal "https://shrine.imgix.net/foo", @file.imgix_url
+      end
+    end
+
+    describe "#delete" do
+      it "purges when purging is enabled" do
+        @shrine.plugin :imgix, purge: true
+
+        @shrine.imgix_client.expects(:purge).with("foo")
+
+        @file.delete
+      end
+
+      it "includes prefix when purging" do
+        @shrine.plugin :imgix, purge: true
+        @shrine.storages[:memory].instance_eval { def prefix; "prefix"; end }
+
+        @shrine.imgix_client.expects(:purge).with("prefix/foo")
+
+        @file.delete
+      end
+
+      it "doesn't purge by default" do
+        @shrine.imgix_client.expects(:purge).never
+
+        @file.delete
+      end
     end
   end
 end

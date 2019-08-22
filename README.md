@@ -3,7 +3,7 @@
 Provides [Imgix] integration for [Shrine].
 
 Imgix is a service for processing images on the fly, and works with files
-stored on Amazon S3.
+stored on external services such as AWS S3 or Google Cloud Storage.
 
 ## Installation
 
@@ -11,70 +11,81 @@ stored on Amazon S3.
 gem "shrine-imgix"
 ```
 
-## Usage
+## Configuring
 
-Imgix doesn't upload files directly, but instead it transfers images from
-various sources (S3, Web Folder or Web Proxy), so you first need to set that up
-(see the [Imgix documentation]). After this is set up, the Imgix Shrine
-"storage" is used as a wrapper around the main storage of the source:
+Load the `imgix` plugin with Imgix client settings:
 
 ```rb
-require "shrine/storage/imgix"
-require "shrine/storage/s3"
-
-imgix = Shrine::Storage::Imgix.new(
-  storage:          Shrine::Storage::S3.new(**s3_options),
-  include_prefix:   true, # set to false if you have prefix configured in Imgix source
-  api_key:          "xzy123",                 #
-  host:             "my-subdomain.imgix.net", # Imgix::Client options
-  secure_url_token: "abc123", # optional      #
-)
-
-Shrine.storages[:store] = imgix
+Shrine.plugin :imgix, client: {
+  host:             "your-subdomain.imgix.net",
+  secure_url_token: "abc123",
+}
 ```
 
-All options other than `:storage` and `:include_prefix` are used for
-instantiating an `Imgix::Client`, see the [imgix] gem for information about all
-possible options. The `:include_prefix` option decides whether the `#prefix`
-of the underlying storage will be included in the generated Imgix URLs.
-
-All storage actions are forwarded to the main storage, and deleted files are
-automatically purged from Imgix. The only method that the Imgix storage
-overrides is, of course, `#url`:
+You can also pass in an `Imgix::Client` object directly:
 
 ```rb
-post.image.url(w: 150, h: 200, fit: "crop")
+require "imgix"
+
+imgix_client = Imgix::Client.new(
+  host:             "your-subdomain.imgix.net",
+  secure_url_token: "abc123",
+)
+
+Shrine.plugin :imgix, client: imgix_client
+```
+
+### Path prefix
+
+If you've configured a "Path Prefix" on your Imgix source, and you also have
+`:prefix` set on your Shrine storage, you'll need tell the `imgix` plugin to
+exclude the storage prefix from generated URLs:
+
+```rb
+Shrine.plugin :imgix, client: ..., prefix: false
+```
+
+## Usage
+
+You can generate an Imgix URL for a `Shrine::UploadedFile` object by calling
+`#imgix_url`:
+
+```rb
+photo.image.imgix_url(w: 150, h: 200, fit: "crop")
 #=> "http://my-subdomain.imgix.net/943kdfs0gkfg.jpg?w=150&h=200&fit=crop"
 ```
 
-See the [Imgix docs](https://www.imgix.com/docs/reference) for all available
-URL options.
+See the [Imgix docs][url reference] for all available URL options.
 
-If you're using [imgix-rails] and want to use the `ix_image_tag` helper method,
-you can extract the path portion of the URL and pass it on to the helper:
+### Rails
+
+If you're using [imgix-rails] and want to use the `ix_*` helpers, you can use
+`#imgix_id` to retrieve the Imgix path:
 
 ```erb
-<%= ix_image_tag URI(photo.image.url).path, { w: 300, h: 500, fit: "crop" } %>
+<%= ix_image_tag photo.image.imgix_id, url_params: { w: 300, h: 500, fit: "crop" } %>
 ```
+
+### Purging
+
+If you want images to be automatically [purged][purging] from Imgix on
+deletion, you can set `:purge` to `true`:
+
+```rb
+Shrine.plugin :imgix, client: ..., purge: true
+```
+
+You can also purge manually with `Shrine::UploadedFile#imgix_purge`:
+
+```rb
+photo.image.imgix_purge
+```
+
+Note that purging requires passing the `:api_key` option to your Imgix client.
 
 ## Development
 
-The tests for shrine-imgix uses S3, so you'll have to create an `.env` file with
-appropriate credentials:
-
-```sh
-# .env
-IMGIX_API_KEY="..."
-IMGIX_HOST="..."
-IMGIX_SECURE_URL_TOKEN="..." # optional
-S3_ACCESS_KEY_ID="..."
-S3_SECRET_ACCESS_KEY="..."
-S3_REGION="..."
-S3_BUCKET="..."
-S3_PREFIX="..."
-```
-
-Afterwards you can run the tests:
+You can run the test suite with:
 
 ```sh
 $ bundle exec rake test
@@ -87,5 +98,6 @@ $ bundle exec rake test
 [Imgix]: https://www.imgix.com/
 [Shrine]: https://github.com/janko/shrine
 [imgix]: https://github.com/imgix/imgix-rb
-[Imgix documentation]: https://www.imgix.com/docs
+[url reference]: https://docs.imgix.com/apis/url
 [imgix-rails]: https://github.com/imgix/imgix-rails
+[purging]: https://docs.imgix.com/setup/purging-images

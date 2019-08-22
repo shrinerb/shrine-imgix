@@ -3,13 +3,6 @@ require "bundler/setup"
 require "minitest/autorun"
 require "minitest/pride"
 
-require "shrine/storage/imgix"
-require "dotenv"
+require "mocha/minitest"
 
-Dotenv.load!
-
-class Minitest::Test
-  def image
-    File.open("test/fixtures/image.jpg")
-  end
-end
+require "shrine"

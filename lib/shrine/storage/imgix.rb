@@ -2,6 +2,8 @@ require "imgix"
 require "net/http"
 require "uri"
 
+warn "Shrine::Storage::Imgix is deprecated and will be removed in next major version. Use the new :imgix plugin instead."
+
 class Shrine
   module Storage
     class Imgix
