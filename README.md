@@ -85,7 +85,7 @@ $ bundle exec rake test
 [MIT](http://opensource.org/licenses/MIT)
 
 [Imgix]: https://www.imgix.com/
-[Shrine]: https://github.com/janko-m/shrine
+[Shrine]: https://github.com/janko/shrine
 [imgix]: https://github.com/imgix/imgix-rb
 [Imgix documentation]: https://www.imgix.com/docs
 [imgix-rails]: https://github.com/imgix/imgix-rails
