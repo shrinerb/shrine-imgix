@@ -5,7 +5,7 @@ Gem::Specification.new do |gem|
   gem.required_ruby_version = ">= 2.1"
 
   gem.summary      = "Provides Imgix integration for Shrine."
-  gem.homepage     = "https://github.com/janko/shrine-imgix"
+  gem.homepage     = "https://github.com/shrinerb/shrine-imgix"
   gem.authors      = ["Janko Marohnić"]
   gem.email        = ["janko.marohnic@gmail.com"]
   gem.license      = "MIT"
