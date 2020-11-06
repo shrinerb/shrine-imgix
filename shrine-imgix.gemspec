@@ -1,6 +1,6 @@
 Gem::Specification.new do |gem|
   gem.name          = "shrine-imgix"
-  gem.version       = "0.5.1"
+  gem.version       = "0.5.2"
 
   gem.required_ruby_version = ">= 2.1"
 
