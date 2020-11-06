@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.require_path = "lib"
 
   gem.add_dependency "shrine", ">= 2.0", "< 4"
-  gem.add_dependency "imgix", ">= 1.2", "< 4"
+  gem.add_dependency "imgix", ">= 1.2", "< 5"
 
   gem.add_development_dependency "rake"
   gem.add_development_dependency "minitest"

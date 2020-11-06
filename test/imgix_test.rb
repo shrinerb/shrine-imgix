@@ -11,14 +11,14 @@ describe Shrine::Plugins::Imgix do
 
   describe ".configure" do
     it "accepts :client as a hash" do
-      @shrine.plugin :imgix, client: { host: "shrine.imgix.net" }
+      @shrine.plugin :imgix, client: { domain: "shrine.imgix.net" }
 
       assert_instance_of Imgix::Client, @shrine.imgix_client
       assert_match "https://shrine.imgix.net/foo", @shrine.imgix_client.path("/foo").to_url
     end
 
     it "accepts :client as an Imgix::Client" do
-      @shrine.plugin :imgix, client: Imgix::Client.new(host: "shrine.imgix.net")
+      @shrine.plugin :imgix, client: Imgix::Client.new(domain: "shrine.imgix.net")
 
       assert_instance_of Imgix::Client, @shrine.imgix_client
       assert_match "https://shrine.imgix.net/foo", @shrine.imgix_client.path("/foo").to_url
@@ -33,7 +33,7 @@ describe Shrine::Plugins::Imgix do
 
   describe "UploadedFile" do
     before do
-      @shrine.plugin :imgix, client: { host: "shrine.imgix.net", include_library_param: false }
+      @shrine.plugin :imgix, client: { domain: "shrine.imgix.net", include_library_param: false }
 
       @file = @shrine.upload(StringIO.new("file"), :memory, location: "foo")
     end
